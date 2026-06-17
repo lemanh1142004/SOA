@@ -592,7 +592,7 @@ def start_kafka_consumer():
             consumer_kwargs['sasl_mechanism'] = 'PLAIN'
             consumer_kwargs['sasl_plain_username'] = kafka_user
             consumer_kwargs['sasl_plain_password'] = kafka_password
-
+            consumer_kwargs['ssl_cafile'] = 'ca.pem'
         # 3. Khởi tạo Consumer với cấu hình đã thiết lập
         consumer = KafkaConsumer('car_events', **consumer_kwargs)
         
