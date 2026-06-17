@@ -572,17 +572,33 @@ def association_rules_api():
 
 def start_kafka_consumer():
     try:
-        # Thêm kiểm tra m is not None trong deserializer để tránh lỗi giải mã
-        consumer = KafkaConsumer(
-            'car_events',
-            bootstrap_servers=['127.0.0.1:9092'],
-            auto_offset_reset='latest',
-            enable_auto_commit=True,
-            group_id='ai-service-group',
-            value_deserializer=lambda m: json.loads(m.decode('utf-8')) if m is not None else None
-        )
-        logger.info("🎧 AI Service đang lắng nghe Kafka topic: car_events...")
+        # Lấy thông tin từ biến môi trường (nếu không có sẽ mặc định dùng localhost)
+        kafka_server = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "127.0.0.1:9092")
+        kafka_user = os.getenv("KAFKA_USERNAME")
+        kafka_password = os.getenv("KAFKA_PASSWORD")
+
+        # 1. Cấu hình cơ bản cho Consumer
+        consumer_kwargs = {
+            'bootstrap_servers': [kafka_server],
+            'auto_offset_reset': 'latest',
+            'enable_auto_commit': True,
+            'group_id': 'ai-service-group',
+            'value_deserializer': lambda m: json.loads(m.decode('utf-8')) if m is not None else None
+        }
+
+        # 2. Cấu hình bảo mật nâng cao (Dành cho Aiven Kafka trên Cloud)
+        if kafka_user and kafka_password:
+            consumer_kwargs['security_protocol'] = 'SASL_SSL'
+            consumer_kwargs['sasl_mechanism'] = 'PLAIN'
+            consumer_kwargs['sasl_plain_username'] = kafka_user
+            consumer_kwargs['sasl_plain_password'] = kafka_password
+
+        # 3. Khởi tạo Consumer với cấu hình đã thiết lập
+        consumer = KafkaConsumer('car_events', **consumer_kwargs)
         
+        logger.info(f"🎧 AI Service đang lắng nghe Kafka topic: car_events trên {kafka_server}...")
+        
+        # 4. Lắng nghe và xử lý tin nhắn
         for message in consumer:
             # BỌC TRY-EXCEPT Ở ĐÂY: Nếu 1 tin nhắn lỗi, nó chỉ báo lỗi tin đó rồi chạy tiếp tin sau
             try:
@@ -608,7 +624,7 @@ def start_kafka_consumer():
                     logger.warning("⚠️ Bản tin không chứa dữ liệu xe (key 'data' rỗng). Bỏ qua thao tác DB.")
                     continue
 
-                # Nếu có xe mới được tạo, đẩy vào Database của AI
+                # XỬ LÝ DATABASE TƯƠNG ỨNG VỚI HÀNH ĐỘNG (CREATE/UPDATE/DELETE)
                 if action == "CREATE":
                     with engine.begin() as conn:
                         query = text("""
@@ -677,7 +693,6 @@ def start_kafka_consumer():
                 
     except Exception as e:
         logger.error(f"❌ Lỗi thiết lập Kafka Consumer (mất kết nối Kafka hoàn toàn): {e}")
-
 # ─────────────────────────────────────────────
 #  ENTRY POINT
 # ─────────────────────────────────────────────
