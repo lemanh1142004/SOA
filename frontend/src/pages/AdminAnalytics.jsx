@@ -37,10 +37,10 @@ const AdminAnalytics = () => {
       const token = localStorage.getItem("token");
 
       const [segmentsRes, rulesRes] = await Promise.all([
-        axios.get("http://localhost:8080/api/ai/segments", {
+        axios.get("https://gateway-api-ngbw.onrender.com/api/ai/segments", {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        axios.get("http://localhost:8080/api/ai/association-rules", {
+        axios.get("https://gateway-api-ngbw.onrender.com/api/ai/association-rules", {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);

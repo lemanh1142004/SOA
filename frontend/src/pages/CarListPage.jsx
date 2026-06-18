@@ -190,7 +190,7 @@ function CarListPage() {
       const token = localStorage.getItem("token");
 
       const res = await axios.get(
-        `http://localhost:8080/api/cars?page=0&size=5000`,
+        `https://gateway-api-ngbw.onrender.com/api/cars?page=0&size=5000`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },

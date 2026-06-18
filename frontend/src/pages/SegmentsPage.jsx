@@ -424,7 +424,7 @@ function SegmentsPage() {
   const fetchSegments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:8080/api/ai/segments", {
+      const res = await axios.get("https://gateway-api-ngbw.onrender.com/api/ai/segments", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSegments(Array.isArray(res.data) ? res.data : []);
@@ -439,7 +439,7 @@ function SegmentsPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:8080/api/ai/segments/${segmentId}/cars`,
+        `https://gateway-api-ngbw.onrender.com/api/ai/segments/${segmentId}/cars`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setSelectedSegment(segmentId);

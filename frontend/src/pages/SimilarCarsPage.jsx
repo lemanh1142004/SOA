@@ -70,7 +70,7 @@ function SimilarCarsPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:8080/api/ai/recommendations/similar/${carId}`,
+        `https://gateway-api-ngbw.onrender.com/api/ai/recommendations/similar/${carId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

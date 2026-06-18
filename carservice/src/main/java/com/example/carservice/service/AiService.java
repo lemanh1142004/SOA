@@ -20,7 +20,7 @@ public class AiService {
 
         ResponseEntity<AiChatResponse> response =
                 restTemplate.postForEntity(
-                        "http://localhost:5003/chat",
+                        "https://gateway-api-ngbw.onrender.com/api/ai/chat",
                         request,
                         AiChatResponse.class
                 );

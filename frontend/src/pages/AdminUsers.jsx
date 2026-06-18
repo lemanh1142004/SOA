@@ -82,7 +82,7 @@ const AdminUsers = () => {
       try {
         // ✅ CỐ GẮN CALL REAL API
         const res = await axios.get(
-          "http://localhost:8080/api/auth/users?page=0&size=10",
+          "https://gateway-api-ngbw.onrender.com/api/auth/users?page=0&size=10",
           {
             headers: { Authorization: `Bearer ${token}` },
           },
@@ -151,7 +151,7 @@ const AdminUsers = () => {
         // ✅ UPDATE USER
         try {
           await axios.put(
-            `http://localhost:8080/api/auth/users/${editingId}`,
+            `https://gateway-api-ngbw.onrender.com/api/auth/users/${editingId}`,
             formData,
             {
               headers: { Authorization: `Bearer ${token}` },
@@ -172,7 +172,7 @@ const AdminUsers = () => {
       } else {
         // ✅ CREATE USER
         try {
-          await axios.post("http://localhost:8080/api/auth/users", formData, {
+          await axios.post("https://gateway-api-ngbw.onrender.com/api/auth/users", formData, {
             headers: { Authorization: `Bearer ${token}` },
           });
           setMessage("Thêm người dùng mới thành công");
@@ -232,7 +232,7 @@ const AdminUsers = () => {
 
       try {
         // ✅ TRY REAL API
-        await axios.delete(`http://localhost:8080/api/auth/users/${id}`, {
+        await axios.delete(`https://gateway-api-ngbw.onrender.com/api/auth/users/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setMessage("Xóa người dùng thành công");

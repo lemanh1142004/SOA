@@ -1545,7 +1545,7 @@ const AdminCars = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:8080/api/cars?page=${page}&size=10`,
+        `https://gateway-api-ngbw.onrender.com/api/cars?page=${page}&size=10`,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
@@ -1584,7 +1584,7 @@ const AdminCars = () => {
       if (editingId) {
         // ✅ CẬP NHẬT XE
         await axios.put(
-          `http://localhost:8080/api/cars/${editingId}`,
+          `https://gateway-api-ngbw.onrender.com/api/cars/${editingId}`,
           payload,
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -1594,7 +1594,7 @@ const AdminCars = () => {
         setError("");
       } else {
         // ✅ THÊM XE MỚI
-        await axios.post("http://localhost:8080/api/cars", payload, {
+        await axios.post("https://gateway-api-ngbw.onrender.com/api/cars", payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setMessage("Thêm xe mới thành công");
@@ -1635,7 +1635,7 @@ const AdminCars = () => {
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:8080/api/cars/${id}`, {
+      await axios.delete(`https://gateway-api-ngbw.onrender.com/api/cars/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessage("Xóa xe thành công");

@@ -190,7 +190,7 @@ function AIChat() {
     setMessage(""); // Xóa input ngay lập tức sau khi gửi
 
     try {
-      const response = await axios.post("http://localhost:8080/api/ai/chat", {
+      const response = await axios.post("https://gateway-api-ngbw.onrender.com/api/ai/chat", {
         message: message,
       });
 

@@ -68,7 +68,7 @@ function CarDetailPage() {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:8080/api/cars/${id}`, {
+      const res = await axios.get(`https://gateway-api-ngbw.onrender.com/api/cars/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const carData = res.data;
@@ -124,7 +124,7 @@ function CarDetailPage() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:8080/api/ai/recommendations/similar/${id}`,
+       `https://gateway-api-ngbw.onrender.com/api/ai/recommendations/similar/${id}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setRelatedCars(res.data?.recommendedCars || []);

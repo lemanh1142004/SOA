@@ -35,15 +35,15 @@ const AdminDashboard = () => {
       try {
         const token = localStorage.getItem("token");
         const [carsRes, segmentsRes, usersRes] = await Promise.all([
-          axios.get("http://localhost:8080/api/cars?page=0&size=1", {
+          axios.get("https://gateway-api-ngbw.onrender.com/api/cars?page=0&size=1", {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get("http://localhost:8080/api/ai/segments", {
+          axios.get("https://gateway-api-ngbw.onrender.com/api/auth/users?page=0&size=1", {
             headers: { Authorization: `Bearer ${token}` },
           }),
           // ✅ TRY TO GET USERS COUNT
           axios
-            .get("http://localhost:8080/api/auth/users?page=0&size=1", {
+            .get("https://gateway-api-ngbw.onrender.com/api/auth/users?page=0&size=1", {
               headers: { Authorization: `Bearer ${token}` },
             })
             .catch(() => ({ data: { totalElements: 0 } })),
