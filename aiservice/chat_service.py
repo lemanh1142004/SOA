@@ -1,6 +1,5 @@
-
-
 import pandas as pd
+import re # <-- THÊM THƯ VIỆN NÀY LÊN ĐẦU HOẶC DƯỚI PANDAS
 from gemini_client import ask_gemini
 
 conversation_history = []
@@ -19,27 +18,49 @@ def chat_with_ai(message):
     from main import get_clustered_df
     df = get_clustered_df()
     
-    # ---------------------------------------------------------
-    # TÍNH NĂNG MỚI: BỘ LỌC TÌM KIẾM XE THÔNG MINH
-    # ---------------------------------------------------------
+    # =========================================================
+    # XÓA ĐOẠN CODE LỌC CŨ CỦA BẠN VÀ DÁN ĐOẠN MỚI NÀY VÀO ĐÂY
+    # =========================================================
     msg_lower = message.lower()
     
-    # Danh sách các hãng xe phổ biến
+    # Danh sách các hãng xe chuẩn
     brands = ["toyota", "honda", "ford", "hyundai", "kia", "mazda", "vinfast", 
               "mercedes", "bmw", "audi", "lexus", "mitsubishi", "chevrolet", "nissan", "suzuki"]
     
-    # Xem khách hàng có nhắc đến hãng nào trong câu hỏi không
-    found_brands = [b for b in brands if b in msg_lower]
+    # 1. Tách câu hỏi của khách thành các từ riêng lẻ
+    words = re.findall(r'\w+', msg_lower)
     
-    if found_brands:
-        # Nếu có, lọc ra những xe thuộc hãng đó
-        filtered_df = df[df['brand'].str.lower().isin(found_brands)]
-        sample_df = filtered_df.head(20) # Lấy 20 xe liên quan nhất
-    else:
-        # Nếu hỏi chung chung, lấy ngẫu nhiên 20 xe để đa dạng hóa
-        sample_df = df.sample(min(20, len(df))) if not df.empty else df
+    found_brands = set()
+    
+    # 2. So sánh từng chữ với danh sách hãng xe
+    for word in words:
+        if len(word) >= 3: 
+            for brand in brands:
+                if brand.startswith(word):
+                    found_brands.add(brand)
+                    
+    found_brands = list(found_brands) 
 
-    # Đưa vào danh sách cho AI
+    # 3. Quét thêm xem khách có nhắc đến năm sản xuất không
+    years_in_msg = re.findall(r'\b(19\d{2}|20\d{2})\b', msg_lower)
+
+    # 4. Truy xuất dữ liệu từ Database
+    if found_brands:
+        filtered_df = df[df['brand'].str.lower().isin(found_brands)]
+        
+        if years_in_msg:
+            year_filtered = filtered_df[filtered_df['nam_sx'].astype(str).isin(years_in_msg)]
+            if not year_filtered.empty:
+                filtered_df = year_filtered 
+                
+        sample_df = filtered_df.head(20) 
+    else:
+        sample_df = df.sample(min(20, len(df))) if not df.empty else df
+    # =========================================================
+    # KẾT THÚC PHẦN DÁN CODE MỚI
+    # =========================================================
+
+    # Đưa vào danh sách cho AI (PHẦN NÀY GIỮ NGUYÊN)
     cars = []
     for _, row in sample_df.iterrows():
         cars.append({
