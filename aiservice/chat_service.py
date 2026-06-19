@@ -45,16 +45,24 @@ def chat_with_ai(message):
     years_in_msg = re.findall(r'\b(19\d{2}|20\d{2})\b', msg_lower)
 
     # 4. Truy xuất dữ liệu từ Database
+# 4. Truy xuất dữ liệu từ Database
     if found_brands:
-        filtered_df = df[df['brand'].str.lower().isin(found_brands)]
+        # Nối các hãng tìm được thành chuỗi regex (Ví dụ: 'vinfast|toyota')
+        search_pattern = '|'.join(found_brands)
         
+        # Quét TÌM TRỰC TIẾP TÊN HÃNG BÊN TRONG CỘT TIÊU ĐỀ thay vì cột brand
+        filtered_df = df[df['tieu_de'].str.lower().str.contains(search_pattern, na=False)]
+        
+        # Ưu tiên lọc thêm theo năm (nếu có nhắc đến số năm)
         if years_in_msg:
             year_filtered = filtered_df[filtered_df['nam_sx'].astype(str).isin(years_in_msg)]
             if not year_filtered.empty:
                 filtered_df = year_filtered 
                 
+        # Lấy 20 xe liên quan nhất đưa cho AI
         sample_df = filtered_df.head(20) 
     else:
+        # Nếu hỏi chung chung không rõ hãng, lấy ngẫu nhiên 20 xe
         sample_df = df.sample(min(20, len(df))) if not df.empty else df
     # =========================================================
     # KẾT THÚC PHẦN DÁN CODE MỚI
