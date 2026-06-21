@@ -1,168 +1,4 @@
-// import { useState } from "react";
-// import axios from "axios";
 
-// function AIChat() {
-
-//     const [open, setOpen] = useState(false);
-//     const [message, setMessage] = useState("");
-//     const [messages, setMessages] = useState([]);
-
-//     const sendMessage = async () => {
-
-//         if (!message.trim()) return;
-
-//         const userMessage = {
-//             role: "user",
-//             content: message
-//         };
-
-//         setMessages(prev => [...prev, userMessage]);
-
-//         try {
-
-//             const response = await axios.post(
-//     "http://localhost:8080/api/ai/chat",
-//                 {
-//                     message: message
-//                 }
-//             );
-
-//            const aiMessage = {
-//     role: "assistant",
-//     content: response.data.answer
-// };
-
-//             setMessages(prev => [...prev, aiMessage]);
-
-//         } catch (error) {
-
-//             setMessages(prev => [
-//                 ...prev,
-//                 {
-//                     role: "assistant",
-//                     content: "Không kết nối được AI"
-//                 }
-//             ]);
-
-//         }
-
-//         setMessage("");
-//     };
-
-//     return (
-//         <>
-//             {/* Bong bóng chat */}
-
-//             <div
-//                 onClick={() => setOpen(!open)}
-//                 style={{
-//                     position: "fixed",
-//                     right: "20px",
-//                     bottom: "20px",
-//                     width: "60px",
-//                     height: "60px",
-//                     borderRadius: "50%",
-//                     background: "#1976d2",
-//                     color: "white",
-//                     display: "flex",
-//                     alignItems: "center",
-//                     justifyContent: "center",
-//                     cursor: "pointer",
-//                     fontSize: "28px",
-//                     zIndex: 9999
-//                 }}
-//             >
-//                 💬
-//             </div>
-
-//             {open && (
-//                 <div
-//                     style={{
-//                         position: "fixed",
-//                         right: "20px",
-//                         bottom: "90px",
-//                         width: "350px",
-//                         height: "500px",
-//                         background: "#fff",
-//                         border: "1px solid #ddd",
-//                         borderRadius: "10px",
-//                         display: "flex",
-//                         flexDirection: "column",
-//                         zIndex: 9999
-//                     }}
-//                 >
-
-//                     <div
-//                         style={{
-//                             padding: "12px",
-//                             background: "#1976d2",
-//                             color: "white"
-//                         }}
-//                     >
-//                         AI Car Consultant
-//                     </div>
-
-//                     <div
-//                         style={{
-//                             flex: 1,
-//                             overflowY: "auto",
-//                             padding: "10px"
-//                         }}
-//                     >
-//                         {messages.map((msg, index) => (
-//                             <div
-//                                 key={index}
-//                                 style={{
-//                                     marginBottom: "10px"
-//                                 }}
-//                             >
-//                                 <b>
-//                                     {msg.role === "user"
-//                                         ? "Bạn"
-//                                         : "AI"}
-//                                     :
-//                                 </b>{" "}
-//                                 {msg.content}
-//                             </div>
-//                         ))}
-//                     </div>
-
-//                     <div
-//                         style={{
-//                             display: "flex",
-//                             borderTop: "1px solid #ddd"
-//                         }}
-//                     >
-//                         <input
-//                             style={{
-//                                 flex: 1,
-//                                 padding: "10px"
-//                             }}
-//                             value={message}
-//                             onChange={(e) =>
-//                                 setMessage(e.target.value)
-//                             }
-//                             onKeyDown={(e) => {
-//                                 if (e.key === "Enter") {
-//                                     sendMessage();
-//                                 }
-//                             }}
-//                         />
-
-//                         <button
-//                             onClick={sendMessage}
-//                         >
-//                             Gửi
-//                         </button>
-//                     </div>
-
-//                 </div>
-//             )}
-//         </>
-//     );
-// }
-
-// export default AIChat;
 
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
@@ -172,7 +8,26 @@ function AIChat() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
+const loadHistory = async () => {
+  try {
 
+const user = JSON.parse(localStorage.getItem("user"));
+const userId = user?.id;
+    const response = await axios.get(
+      `https://gateway-api-ngbw.onrender.com/api/ai/chat/history/${userId}`
+    );
+
+    const history = response.data.map(item => ({
+      role: item.role,
+      content: item.message
+    }));
+
+    setMessages(history);
+
+  } catch (error) {
+    console.error("Không tải được lịch sử chat", error);
+  }
+};
   // Tự động cuộn xuống tin nhắn mới nhất
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -181,7 +36,9 @@ function AIChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, open]);
-
+useEffect(() => {
+  loadHistory();
+}, []);
   const sendMessage = async () => {
     if (!message.trim()) return;
 
@@ -190,9 +47,15 @@ function AIChat() {
     setMessage(""); // Xóa input ngay lập tức sau khi gửi
 
     try {
-      const response = await axios.post("https://gateway-api-ngbw.onrender.com/api/ai/chat", {
-        message: message,
-      });
+const user = JSON.parse(localStorage.getItem("user"));
+const userId = user?.id;
+const response = await axios.post(
+  "https://gateway-api-ngbw.onrender.com/api/ai/chat",
+  {
+    userId: Number(userId),
+    message: message,
+  }
+);
 
       const aiMessage = {
         role: "assistant",

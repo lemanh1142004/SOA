@@ -102,6 +102,48 @@ _cache: TTLCache = TTLCache(maxsize=1, ttl=CACHE_TTL)
 _cache_lock = Lock()   # tránh thundering herd (nhiều request cùng rebuild)
 
 
+
+
+def save_chat(user_id, role, message):
+
+    with engine.begin() as conn:
+
+        conn.execute(
+            text("""
+                INSERT INTO chat_history
+                (user_id, role, message)
+                VALUES
+                (:user_id, :role, :message)
+            """),
+            {
+                "user_id": user_id,
+                "role": role,
+                "message": message
+            }
+        )
+def get_chat_history(user_id, limit=20):
+
+    with engine.begin() as conn:
+
+        result = conn.execute(
+            text("""
+                SELECT role, message
+                FROM chat_history
+                WHERE user_id = :user_id
+                ORDER BY created_at DESC
+                LIMIT :limit
+            """),
+            {
+                "user_id": user_id,
+                "limit": limit
+            }
+        )
+
+        rows = result.fetchall()
+
+    rows.reverse()
+
+    return rows
 # ─────────────────────────────────────────────
 #  HELPER — xử lý giá trị an toàn khi serialize
 # ─────────────────────────────────────────────
@@ -569,7 +611,35 @@ def association_rules_api():
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(exc))
 
+@app.get("/chat/history/{user_id}")
+def chat_history(user_id: int):
 
+    with engine.begin() as conn:
+
+        result = conn.execute(
+            text("""
+                SELECT role,
+                       message,
+                       created_at
+                FROM chat_history
+                WHERE user_id = :user_id
+                ORDER BY created_at ASC
+            """),
+            {
+                "user_id": user_id
+            }
+        )
+
+        rows = result.fetchall()
+
+    return [
+        {
+            "role": row.role,
+            "message": row.message,
+            "createdAt": row.created_at
+        }
+        for row in rows
+    ]
 def start_kafka_consumer():
     try:
         # Lấy thông tin từ biến môi trường (nếu không có sẽ mặc định dùng localhost)
@@ -704,24 +774,11 @@ if __name__ == "__main__":
 @app.post("/chat")
 def chat(req: ChatRequest):
 
-    answer = chat_with_ai(req.message)
+    answer = chat_with_ai(
+        req.userId,
+        req.message
+    )
 
     return {
         "answer": answer
     }
-# Cách chạy:
-#   cd aiservice
-#   python -m venv venv && source venv/bin/activate
-#   pip install fastapi uvicorn sqlalchemy psycopg2-binary pandas \
-#               scikit-learn mlxtend numpy cachetools
-#   DATABASE_URL="postgresql+psycopg2://user:pass@host/db" python main.py
-
-# cd aiservice
-# venv\Scripts\python.exe main.py
-
-# ai_env\Scripts\activate
-# ai_env\Scripts\python.exe main.py
-
-# bật docker lên, đảm bảo Kafka đang chạy trên localhost:9092
-# tạo 1 teminal mới, chạy Kafka producer để test:
-#C:\Users\manhdung\Desktop\SOA_NEW>docker-compose up -d 
