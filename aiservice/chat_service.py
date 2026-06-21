@@ -5,27 +5,33 @@ from gemini_client import ask_gemini
 
 
 def chat_with_ai(user_id, message):
-    from main import get_chat_history
-    from main import get_clustered_df
 
-    # Lưu câu hỏi của user
-    save_chat(
+    # Import bên trong hàm để tránh circular import
+    import main
+
+    # ==========================
+    # Lưu câu hỏi user
+    # ==========================
+    main.save_chat(
         user_id=user_id,
         role="user",
         message=message
     )
 
-    # Lấy 20 tin nhắn gần nhất
-    history_rows = get_chat_history(user_id)
+    # ==========================
+    # Lấy lịch sử chat
+    # ==========================
+    history_rows = main.get_chat_history(user_id)
 
     history_text = ""
 
     for row in history_rows:
-        history_text += (
-            f"{row.role}: {row.message}\n"
-        )
+        history_text += f"{row.role}: {row.message}\n"
 
-    df = get_clustered_df()
+    # ==========================
+    # Lấy dữ liệu xe
+    # ==========================
+    df = main.get_clustered_df()
 
     msg_lower = message.lower()
 
@@ -47,7 +53,7 @@ def chat_with_ai(user_id, message):
         "suzuki"
     ]
 
-    words = re.findall(r'\w+', msg_lower)
+    words = re.findall(r"\w+", msg_lower)
 
     found_brands = set()
 
@@ -60,10 +66,13 @@ def chat_with_ai(user_id, message):
     found_brands = list(found_brands)
 
     years_in_msg = re.findall(
-        r'\b(19\d{2}|20\d{2})\b',
+        r"\b(19\d{2}|20\d{2})\b",
         msg_lower
     )
 
+    # ==========================
+    # Lọc xe theo hãng
+    # ==========================
     if found_brands:
 
         search_pattern = "|".join(found_brands)
@@ -98,6 +107,9 @@ def chat_with_ai(user_id, message):
             else df
         )
 
+    # ==========================
+    # Chuẩn bị dữ liệu cho AI
+    # ==========================
     cars = []
 
     for _, row in sample_df.iterrows():
@@ -109,6 +121,9 @@ def chat_with_ai(user_id, message):
             "year": row.get("nam_sx", "")
         })
 
+    # ==========================
+    # Prompt
+    # ==========================
     prompt = f"""
 Lịch sử hội thoại:
 {history_text}
@@ -135,12 +150,16 @@ Chỉ được đề xuất xe có trong danh sách.
 Không được bịa thông tin.
 Trả lời ngắn gọn, thân thiện và chuyên nghiệp.
 """
-    from main import save_chat
 
+    # ==========================
+    # Gọi Gemini
+    # ==========================
     response = ask_gemini(prompt)
 
+    # ==========================
     # Lưu câu trả lời AI
-    save_chat(
+    # ==========================
+    main.save_chat(
         user_id=user_id,
         role="assistant",
         message=response
