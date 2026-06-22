@@ -198,7 +198,7 @@ const Footer = () => {
         <div style={{ display: "flex", gap: "16px" }}>
           <span>Phiên bản 1.0</span>
           <span>•</span>
-          <strong>Phát triển bởi Nhóm 8</strong>
+          <strong>Phát triển bởi Nhóm 11</strong>
         </div>
       </div>
     </footer>
