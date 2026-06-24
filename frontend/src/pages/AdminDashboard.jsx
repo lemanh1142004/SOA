@@ -40,7 +40,7 @@ const AdminDashboard = () => {
   }),
 
   // API phân khúc
-  axios.get("https://gateway-api-ngbw.onrender.com/api/segments", {
+  axios.get( "https://gateway-api-ngbw.onrender.com/api/ai/segments", {
     headers: { Authorization: `Bearer ${token}` },
   }),
 
