@@ -34,25 +34,25 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       try {
         const token = localStorage.getItem("token");
-        const [carsRes, segmentsRes, usersRes] = await Promise.all([
-          axios.get("https://gateway-api-ngbw.onrender.com/api/cars?page=0&size=1", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get("https://gateway-api-ngbw.onrender.com/api/auth/users?page=0&size=1", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          // ✅ TRY TO GET USERS COUNT
-          axios
-            .get("https://gateway-api-ngbw.onrender.com/api/auth/users?page=0&size=1", {
-              headers: { Authorization: `Bearer ${token}` },
-            })
-            .catch(() => ({ data: { totalElements: 0 } })),
-        ]);
+      const [carsRes, segmentsRes, usersRes] = await Promise.all([
+  axios.get("https://gateway-api-ngbw.onrender.com/api/cars?page=0&size=1", {
+    headers: { Authorization: `Bearer ${token}` },
+  }),
 
+  // API phân khúc
+  axios.get("https://gateway-api-ngbw.onrender.com/api/segments", {
+    headers: { Authorization: `Bearer ${token}` },
+  }),
+
+  // API users
+  axios.get("https://gateway-api-ngbw.onrender.com/api/auth/users?page=0&size=1", {
+    headers: { Authorization: `Bearer ${token}` },
+  }),
+]);
         // Backend trả về array trực tiếp hoặc object với segments field
-        const segmentsData = Array.isArray(segmentsRes.data)
-          ? segmentsRes.data
-          : segmentsRes.data.segments || [];
+ const segmentsData = Array.isArray(segmentsRes.data)
+  ? segmentsRes.data
+  : [];
 
         setStats({
           totalCars: carsRes.data.totalElements || 0,
